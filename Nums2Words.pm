@@ -12,7 +12,7 @@ require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(num2word num2usdollars num2word_ordinal);
 
-$VERSION = "1.0";
+$VERSION = "1.1";
 sub Version { $VERSION; }
 
 
@@ -102,7 +102,8 @@ sub num2usdollars {
   # NEW_CODE: very ugly 27 lines of nested if statements.  Patches welcome.
   my($Int,$Dec,$UserScrewUp) = split(/\./, $Number, 3);
   my($DecPart)="00";
-  if (length($UserScrewUp)) { warn "num2usdollars() given invalid value."; }
+  if (defined($UserScrewUp) && length($UserScrewUp)) {
+		warn "num2usdollars() given invalid value."; }
   if (! length($Int)) { $Int=0; }
   if (! length($Dec)) {
     $DecPart="00";

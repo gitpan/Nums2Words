@@ -1,5 +1,5 @@
 Module: Lingua::EN::Nums2Words                              Date: 06/11/1998
-Version: 1.0
+Version: 1.1
 Author: Lester H. Hightower, Jr.
         hightowe@united-railway.com
         hightowe@progressive-comp.com
@@ -40,4 +40,10 @@ License:
        This software cannot be placed on a CD-ROM or similar
        media for commercial distribution without the prior
        approval of the author.
+
+Change Log:
+  Vesion 1.0 -> 1.1
+  * Removed Makefile from the MANIFEST per Graham Barr <gbarr@ti.com>
+  * Replaced test.pl with Graham Barr's <gbarr@ti.com> contributed script.
+  * Fixed an "Use of uninitialized value" warning on $UserScrewUp
 
