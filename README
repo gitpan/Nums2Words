@@ -1,0 +1,43 @@
+Module: Lingua::EN::Nums2Words                              Date: 06/11/1998
+Version: 1.0
+Author: Lester H. Hightower, Jr.
+        hightowe@united-railway.com
+        hightowe@progressive-comp.com
+        hightowe@railwayex.com
+
+
+This is a module for perl that computes English verbage from numerical values.
+
+To install this module. Make sure you are in the directory that this README
+file is in and type:
+
+        perl Makefile.PL	# to build the Makefile
+	make test		# to test the module before installing
+        make install		# to install the module
+
+After installation, you should be able to "man Lingua::EN::Nums2Words" which
+will get you to usage information for the module.  The man page should be
+placed somewhere like /usr/local/lib/perl5/man/man3/Lingua::EN::Nums2Words.3
+and if not you should be able to "pod2man Nums2Words.pl > Nums2Words.3" and
+then do "man ./Nums2Words.3" to view the man page.  The script test.pl also
+fully demonstrates the module's functionality.
+
+
+License:
+       A license is hereby granted for anyone to reuse this Perl
+       module in its original, unaltered form for any purpose,
+       including any commercial software endeavor.  However, any
+       modifications to this code or any derivative work
+       (including ports to other languages) must be submitted to
+       the original author, Lester H. Hightower Jr., before the
+       modified software or derivative work is used in any
+       commercial application.  All modifications or derivative
+       works must be submitted to the author with 30 days of
+       completion.  The author reserves the right to incorporate
+       any modifications or derivative work into future releases
+       of this software.
+
+       This software cannot be placed on a CD-ROM or similar
+       media for commercial distribution without the prior
+       approval of the author.
+

@@ -1,0 +1,6 @@
+MANIFEST
+Makefile
+Makefile.PL
+Nums2Words.pm
+README
+test.pl
