@@ -1,29 +1,60 @@
-                                     NAME
-                                       
-   Lingua::ID::Nums2Words - convert number to Indonesian verbage.
-     _________________________________________________________________
-   
-                                   SYNOPSIS
-                                       
-  use Lingua::ID::Nums2Words ;
+Module: Lingua::EN::Nums2Words                  Last Revised Date: 01/19/2000
+Version: 1.12
+Author: Lester H. Hightower, Jr.
+        hightowe@abcrs.com
+        hightowe@united-railway.com
+        hightowe@railwayex.com
 
-  print nums2words(123)        ; # "seratus dua puluh tiga"
-  print nums2words_simple(123) ; # "satu dua tiga"
-     _________________________________________________________________
-   
-                                  DESCRIPTION
-                                       
-   words2nums currently can handle real numbers in normal and scientific
-   form in the order of hundreds of trillions. It also preserves
-   formatting in the number string (e.g, given ``1.00'' words2nums will
-   pronounce the zeros.
-     _________________________________________________________________
-   
-                                    AUTHOR
-                                       
-   Steven Haryanto <sh@hhh.indoglobal.com>
-     _________________________________________________________________
-   
-                                   SEE ALSO
-                                       
-   Lingua::ID::Words2Nums
+
+This is a module for perl that computes English verbage from numerical values.
+
+To install this module. Make sure you are in the directory that this README
+file is in and type:
+
+        perl Makefile.PL	# to build the Makefile
+	make test		# to test the module before installing
+        make install		# to install the module
+
+After installation, you should be able to "man Lingua::EN::Nums2Words" which
+will get you to usage information for the module.  The man page should be
+placed somewhere like /usr/local/lib/perl5/man/man3/Lingua::EN::Nums2Words.3
+and if not you should be able to "pod2man Nums2Words.pl > Nums2Words.3" and
+then do "man ./Nums2Words.3" to view the man page.  The script test.pl also
+fully demonstrates the module's functionality.
+
+
+License:
+       A license is hereby granted for anyone to reuse this Perl
+       module in its original, unaltered form for any purpose,
+       including any commercial software endeavor.  However, any
+       modifications to this code or any derivative work
+       (including ports to other languages) must be submitted to
+       the original author, Lester H. Hightower Jr., before the
+       modified software or derivative work is used in any
+       commercial application.  All modifications or derivative
+       works must be submitted to the author with 30 days of
+       completion.  The author reserves the right to incorporate
+       any modifications or derivative work into future releases
+       of this software.
+
+       This software cannot be placed on a CD-ROM or similar
+       media for commercial distribution without the prior
+       approval of the author.
+
+Change Log:
+  Vesion 1.0 -> 1.1
+  * Removed Makefile from the MANIFEST per Graham Barr <gbarr@ti.com>
+  * Replaced test.pl with Graham Barr's <gbarr@ti.com> contributed script.
+  * Fixed an "Use of uninitialized value" warning on $UserScrewUp
+
+  Vesion 1.1 -> 1.11 (released 12/14/1998)
+  * Bugfix in num2usdollars to fix a condition where "ONE DOLLARS" was
+    returned instead of "ONE DOLLAR"
+  * Added &num2word_short_ordinal().  This addition was the suggestion of 
+    Kim Ryan <kimaryan@ozemail.com.au>.
+
+  Vesion 1.11 -> 1.12 (released 01/19/2000)
+  * Bugfix in num2word_ordinal() which caused the function to return
+    cardinal words for values 0 through 20.  Thanks to Benjamin Franz
+    <snowhare@nihongo.org> for finding this bug and sending a patch.
+
