@@ -1,5 +1,5 @@
-Module: Lingua::EN::Nums2Words                              Date: 06/11/1998
-Version: 1.1
+Module: Lingua::EN::Nums2Words                              Date: 12/14/1998
+Version: 1.11
 Author: Lester H. Hightower, Jr.
         hightowe@united-railway.com
         hightowe@progressive-comp.com
@@ -46,4 +46,10 @@ Change Log:
   * Removed Makefile from the MANIFEST per Graham Barr <gbarr@ti.com>
   * Replaced test.pl with Graham Barr's <gbarr@ti.com> contributed script.
   * Fixed an "Use of uninitialized value" warning on $UserScrewUp
+
+  Vesion 1.1 -> 1.11
+  * Bugfix in num2usdollars to fix a condition where "ONE DOLLARS" was
+    returned instead of "ONE DOLLAR"
+  * Added &num2word_short_ordinal().  This addition was the suggestion of 
+    Kim Ryan <kimaryan@ozemail.com.au>.
 

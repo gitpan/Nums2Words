@@ -10,9 +10,9 @@ require 5.000;
 require Exporter;
 
 @ISA = qw(Exporter);
-@EXPORT = qw(num2word num2usdollars num2word_ordinal);
+@EXPORT = qw(num2word num2usdollars num2word_ordinal num2word_short_ordinal);
 
-$VERSION = "1.1";
+$VERSION = "1.11";
 sub Version { $VERSION; }
 
 
@@ -29,6 +29,8 @@ Nums2Words - compute English verbage from numerical values
 =item $Verbage = &num2word($Number);
 
 =item $Verbage = &num2word_ordinal($Number);
+
+=item $Verbage = &num2word_short_ordinal($Number);
 
 =item $Verbage = &num2usdollars($Number);
 
@@ -77,6 +79,7 @@ my(@Classifications);
 my(@MD);
 my(@Categories);
 my(%CardinalToOrdinalMapping);
+my(@CardinalToShortOrdinalMapping);
 ###############################################################################
 
 ###############################################################################
@@ -132,7 +135,9 @@ sub num2usdollars {
   # Get the num2word version
   $Final=num2word_internal($Number, 1);
   # Now whack the num2word version into a US dollar version
-  if (! ($Final=~s/ AND / DOLLARS AND /)) {
+  my($dollar_verb)='DOLLAR';
+  if (abs(int($Number)) != 1) { $dollar_verb .= 'S'; }
+  if (! ($Final=~s/ AND / $dollar_verb AND /)) {
     $Final .= ' DOLLAR';
     if (abs($Number) != 1) { $Final .='S'; }
   } else {
@@ -177,6 +182,25 @@ sub num2word_ordinal {
 
 # Return the verbage to the calling program
 return($Final);
+}
+
+sub num2word_short_ordinal {
+  my($Number) = shift(@_);
+  if ($Number != int($Number)) {
+    warn "num2word_short_ordinal can only handle integers!\n";
+    return($Number);
+  }
+  $Number=int($Number);
+  my($least_sig_dig);
+  if ($Number=~m/([0-9])$/) {
+    $least_sig_dig=$1;
+  } else {
+    warn "num2word_short_ordinal couldn't find least significant int!\n";
+    return($Number);
+  }
+
+  $Number.=$CardinalToShortOrdinalMapping[$least_sig_dig];
+return($Number);
 }
 
 ###############################################################################
@@ -500,6 +524,18 @@ sub init_mod_vars {
   $CardinalToOrdinalMapping{'OCTODECILLION'} =  "OCTODECILLIONTH";
   $CardinalToOrdinalMapping{'NOVEMDECILLION'} =  "NOVEMDECILLIONTH";
   $CardinalToOrdinalMapping{'VIGINTILLION'} =  "VIGINTILLIONTH";
+
+  ###################################################
+  $CardinalToShortOrdinalMapping[0]='th';
+  $CardinalToShortOrdinalMapping[1]='st';
+  $CardinalToShortOrdinalMapping[2]='nd';
+  $CardinalToShortOrdinalMapping[3]='rd';
+  $CardinalToShortOrdinalMapping[4]='th';
+  $CardinalToShortOrdinalMapping[5]='th';
+  $CardinalToShortOrdinalMapping[6]='th';
+  $CardinalToShortOrdinalMapping[7]='th';
+  $CardinalToShortOrdinalMapping[8]='th';
+  $CardinalToShortOrdinalMapping[9]='th';
 }
 
 1;
