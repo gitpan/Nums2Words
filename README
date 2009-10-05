@@ -1,10 +1,6 @@
-Module: Lingua::EN::Nums2Words                  Last Revised Date: 01/19/2000
-Version: 1.12
-Author: Lester H. Hightower, Jr.
-        hightowe@abcrs.com
-        hightowe@united-railway.com
-        hightowe@railwayex.com
-
+Module: Lingua::EN::Nums2Words                  Last Revised Date: 10/05/2009
+Version: 1.13
+Author: Lester H. Hightower, Jr. <hightowe@cpan.org>
 
 This is a module for perl that computes English verbage from numerical values.
 
@@ -22,24 +18,10 @@ and if not you should be able to "pod2man Nums2Words.pl > Nums2Words.3" and
 then do "man ./Nums2Words.3" to view the man page.  The script test.pl also
 fully demonstrates the module's functionality.
 
-
 License:
-       A license is hereby granted for anyone to reuse this Perl
-       module in its original, unaltered form for any purpose,
-       including any commercial software endeavor.  However, any
-       modifications to this code or any derivative work
-       (including ports to other languages) must be submitted to
-       the original author, Lester H. Hightower Jr., before the
-       modified software or derivative work is used in any
-       commercial application.  All modifications or derivative
-       works must be submitted to the author with 30 days of
-       completion.  The author reserves the right to incorporate
-       any modifications or derivative work into future releases
-       of this software.
-
-       This software cannot be placed on a CD-ROM or similar
-       media for commercial distribution without the prior
-       approval of the author.
+ As of version 1.13, this software is licensed under the OSI certified
+ Artistic License, one of the licenses of Perl itself.
+ http://en.wikipedia.org/wiki/Artistic_License
 
 Change Log:
   Vesion 1.0 -> 1.1
@@ -57,4 +39,16 @@ Change Log:
   * Bugfix in num2word_ordinal() which caused the function to return
     cardinal words for values 0 through 20.  Thanks to Benjamin Franz
     <snowhare@nihongo.org> for finding this bug and sending a patch.
+
+  Vesion 1.12 -> 1.13 (released 10/05/2009)
+  * NOTE: There are no functional changes in this release.
+  * Changed the license to the OSI certified Artistic License.
+  * Updated my email address (all listed were out of date).
+  * Fixed verbage/verbiage misspellings in comments and variable names.
+  * Updated POD regarding "short scales" vs. "long scales" -- the
+    American thousands system versus the British millions system --
+    and changed the reference URL to a working one at Wikipedia.
+  * Refactored some code to improve the code style and readbility, and
+    to address some criticisms presented by Earle Martin.
+  * Refactored test.pl a bit and added two additional cases.
 

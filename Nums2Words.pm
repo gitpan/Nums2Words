@@ -1,141 +1,60 @@
 ###############################################################################
-# Numbers to Words Package for Perl.
-# Copyright (C) 1996-1998, Lester Hightower <hightowe@railwayex.com>
-#				hightowe@progressive-comp.com
-#				hightowe@united-railway.com
+# Numbers to Words Module for Perl.
+# Copyright (C) 1996-2009, Lester Hightower <hightowe@cpan.org>
 ###############################################################################
 
 package Lingua::EN::Nums2Words;
 require 5.000;
 require Exporter;
+use strict;
+use warnings;
 
-@ISA = qw(Exporter);
-@EXPORT = qw(num2word num2usdollars num2word_ordinal num2word_short_ordinal);
+our @ISA=qw(Exporter);
+our @EXPORT=qw(num2word num2usdollars num2word_ordinal num2word_short_ordinal);
 
-$VERSION = "1.12";
+our $VERSION = "1.13";
 sub Version { $VERSION; }
 
-
-# Man Page Stuff ##############################################################
-
-=head1 NAME
-
-Nums2Words - compute English verbage from numerical values
-
-=head1 SYNOPSIS
-
-=item use Nums2Words;
-
-=item $Verbage = &num2word($Number);
-
-=item $Verbage = &num2word_ordinal($Number);
-
-=item $Verbage = &num2word_short_ordinal($Number);
-
-=item $Verbage = &num2usdollars($Number);
-
-=head1 DESCRIPTION
-
-To the best of my knowledge, this code has the potential for
-generating US English verbage representative of every real
-value from negative infinity to positive infinity if the
-module's private variables @Classifications and @Categories
-are filled appropriately.  This module generates verbage
-based on the thousands system.
-
-See http://www.quinion.demon.co.uk/words/numbers.htm for
-details of the thousands system versus millions system of
-linguistically representing large numbers.
-
-Copyright (C) 1996-1998, Lester H. Hightower, Jr.
-				hightowe@united-railway.com
-				hightowe@progressive-comp.com
-				hightowe@railwayex.com
-
-=head1 LICENSE
-
-A license is hereby granted for anyone to reuse this Perl module in
-its original, unaltered form for any purpose, including any commercial
-software endeavor.  However, any modifications to this code or any
-derivative work (including ports to other languages) must be submitted
-to the original author, Lester H. Hightower Jr., before the modified
-software or derivative work is used in any commercial application.
-All modifications or derivative works must be submitted to the author
-with 30 days of completion.  The author reserves the right to
-incorporate any modifications or derivative work into future releases
-of this software.
-
-This software cannot be placed on a CD-ROM or similar media for
-commercial distribution without the prior approval of the author.
-
-=cut
 ###############################################################################
-
-###############################################################################
-# Private Module-global Variables #############################################
+# Private File-Global Variables ###############################################
 ###############################################################################
 # Initialization Function init_mod_vars() sets up these variables
-my(@Classifications);
-my(@MD);
-my(@Categories);
-my(%CardinalToOrdinalMapping);
-my(@CardinalToShortOrdinalMapping);
+my @Classifications;
+my @MD;
+my @Categories;
+my %CardinalToOrdinalMapping;
+my @CardinalToShortOrdinalMapping;
+
+# At module load time, initialize our static, file-global variables.
+# We use these file-global variables to increase performance when one
+# needs to compute many iterations for numbers to words.  The alternative
+# would be to re-instantiate the never-changing variables over and over.
+&init_mod_vars;
 ###############################################################################
 
 ###############################################################################
 # Public Functions ############################################################
 ###############################################################################
 sub num2word {
-  my($Number) = shift(@_);
+  my $Number = shift(@_);
 return(&num2word_internal($Number, 0));
 }
 
 sub num2usdollars {
-  my($Number) = shift(@_);
-  my($Final);
-  my($ShouldWeRound) = 0;
+  my $Number = shift(@_);
   # OK, lets do some parsing of what we were handed to be nice and
   # flexible to the users of this API
   $Number=~s/^\$//;			# Kill leading dollar sign
   # Get the decimal into hundreths
-  # NOTE: LHH Replaced the sprintf() with the pattern matching
-  #       and rounding code below as the sprintf() croaks on
-  #       very large decimals.  06/08/1998
-  # OLD_CODE: $Number=sprintf("%0.02f", $Number);
-  # NEW_CODE: very ugly 27 lines of nested if statements.  Patches welcome.
-  my($Int,$Dec,$UserScrewUp) = split(/\./, $Number, 3);
-  my($DecPart)="00";
-  if (defined($UserScrewUp) && length($UserScrewUp)) {
-		warn "num2usdollars() given invalid value."; }
-  if (! length($Int)) { $Int=0; }
-  if (! length($Dec)) {
-    $DecPart="00";
-  } else {
-    if ( $Dec =~ m/^([0-9])([0-9]?)([0-9]?).*$/ ) {
-      if (length($3)) { $ShouldWeRound=int($3); }
-      if (length($1)) { $DecPart = int($1); } else { $DecPart = "0"; }
-      if (length($2)) {
-        if ($ShouldWeRound > 4) {
-          if (int($2) == 9) {
-            if ($DecPart == 9) {
-              $Int++; $DecPart='00';
-            } else {
-              $DecPart++; $DecPart.="0";
-            }
-          } else {
-            $DecPart .= int($2) + 1;
-          }
-        } else {
-          $DecPart .= int($2);
-        }
-      } else { $DecPart .= "0"; }
-    }
-  }
-  $Number=$Int . '.' . $DecPart;
+  # NOTE: sprintf(%f) fails on very large decimal numbers, so we use
+  #       our RoundToTwoDecimalPlaces() instead of a sprintf() call.
+  #$Number=sprintf("%0.02f", $Number);
+  $Number = RoundToTwoDecimalPlaces($Number);
+
   # Get the num2word version
-  $Final=num2word_internal($Number, 1);
+  my $Final=num2word_internal($Number, 1);
   # Now whack the num2word version into a US dollar version
-  my($dollar_verb)='DOLLAR';
+  my $dollar_verb='DOLLAR';
   if (abs(int($Number)) != 1) { $dollar_verb .= 'S'; }
   if (! ($Final=~s/ AND / $dollar_verb AND /)) {
     $Final .= ' DOLLAR';
@@ -144,16 +63,15 @@ sub num2usdollars {
     $Final=~s/(HUNDREDTH|TENTH)([S]?)/CENT$2/;
   }
 
-# Return the verbage to the calling program
+# Return the verbiage to the calling program
 return($Final);
 }
 
 sub num2word_ordinal {
-  my($Number) = shift(@_);
-  my($Final);
+  my $Number = shift(@_);
   my($CardPartToConvToOrd, $ConvTo);
   # Get the num2word version
-  $Final=num2word_internal($Number, 0);
+  my $Final=num2word_internal($Number, 0);
   # Now whack the num2word version into a US dollar version
 
   if ($Final=~/ AND /) {
@@ -180,18 +98,18 @@ sub num2word_ordinal {
     }
   }
 
-# Return the verbage to the calling program
+# Return the verbiage to the calling program
 return($Final);
 }
 
 sub num2word_short_ordinal {
-  my($Number) = shift(@_);
+  my $Number = shift(@_);
   if ($Number != int($Number)) {
     warn "num2word_short_ordinal can only handle integers!\n";
     return($Number);
   }
   $Number=int($Number);
-  my($least_sig_dig);
+  my $least_sig_dig;
   if ($Number=~m/([0-9])$/) {
     $least_sig_dig=$1;
   } else {
@@ -207,20 +125,16 @@ return($Number);
 # Private Functions ###########################################################
 ###############################################################################
 
-# Init the module-global vars that we need.
-# Called on module load.
-&init_mod_vars;
-
 sub num2word_internal {
-  my($Number) = shift(@_);
-  my($KeepTrailingZeros) = shift(@_);
+  my $Number = shift(@_);
+  my $KeepTrailingZeros = shift(@_);
   my($ClassificationIndex, %Breakdown, $Index);
   my($NegativeFlag, $Classification);
-  my($Word, $Final, $DecimalVerbage) = ("", "", "");
+  my($Word, $Final, $DecimalVerbiage) = ("", "", "");
 
-  # Hand the number off to a function to get the verbage
+  # Hand the number off to a function to get the verbiage
   # for what appears after the decimal
-  $DecimalVerbage = &HandleDecimal($Number, $KeepTrailingZeros);
+  $DecimalVerbiage = &HandleDecimal($Number, $KeepTrailingZeros);
 
   # Determine if the number is negative and if so,
   # remember that fact and then make it positive
@@ -229,7 +143,7 @@ sub num2word_internal {
   }
 
   # Take only the integer part of the number for the
-  # calculation of the integer part verbage
+  # calculation of the integer part verbiage
   # NOTE: Changed to regex 06/08/1998 by LHH because the int()
   #       was preventing the code from doing very large numbers
   #       by restricting the precision of $Number.
@@ -254,8 +168,8 @@ sub num2word_internal {
     $ClassificationIndex++; 
   }
 
-  # Go over each of the @Classifications producing the verbage
-  # for each and adding each to the verbage stack ($Final)
+  # Go over each of the @Classifications producing the verbiage
+  # for each and adding each to the verbiage stack ($Final)
   $Index=0;
   foreach $Classification (@Classifications) {
     # If the value of these three digits == 0 then they can be ignored
@@ -279,56 +193,56 @@ sub num2word_internal {
     $Index++;
   }
 
-  # If our $Final verbage is an empty string then our original number
-  # was zero, so make the verbage reflect that.
+  # If our $Final verbiage is an empty string then our original number
+  # was zero, so make the verbiage reflect that.
   if (length($Final) == 0) {
     $Final = "ZERO";
   }
 
   # If we marked the number as negative in the beginning, make the
-  # verbage reflect that by prepending NEGATIVE
+  # verbiage reflect that by prepending NEGATIVE
   if ($NegativeFlag) {
     $Final = "NEGATIVE " . $Final;
   }
 
-  # Now append the decimal portion of the verbage calculated at the
+  # Now append the decimal portion of the verbiage calculated at the
   # beginning if there is any
-  if (length($DecimalVerbage) > 0) {
-    $Final .= " AND " . $DecimalVerbage;
+  if (length($DecimalVerbiage) > 0) {
+    $Final .= " AND " . $DecimalVerbiage;
   }
 
-# Return the verbage to the calling program
+# Return the verbiage to the calling program
 return($Final);
 }
 
 # Helper function which handles three digits from the @Classifications
 # level (THOUSANDS, MILLIONS, etc) - Deals with the HUNDREDs
 sub HandleThreeDigit {
-  my($Number) = shift(@_);
-  my($Hundreds, $HundredVerbage, $TenVerbage, $Verbage);
+  my $Number = shift(@_);
+  my($Hundreds, $HundredVerbiage, $TenVerbiage, $Verbiage);
 
   if (length($Number) > 2) {
     $Hundreds = substr($Number, 0, 1);
-    $HundredVerbage = &HandleTwoDigit($Hundreds);
-    if (length($HundredVerbage) > 0) {
-      $HundredVerbage .= " HUNDRED";
+    $HundredVerbiage = &HandleTwoDigit($Hundreds);
+    if (length($HundredVerbiage) > 0) {
+      $HundredVerbiage .= " HUNDRED";
     }
     $Number = substr($Number, 1);
   }
-  $TenVerbage = &HandleTwoDigit($Number);
-  if ( (defined($HundredVerbage)) && (length($HundredVerbage) > 0) ) {
-    $Verbage = $HundredVerbage;
-    if (length($TenVerbage)) { $Verbage .= " " . $TenVerbage; }
+  $TenVerbiage = &HandleTwoDigit($Number);
+  if ( (defined($HundredVerbiage)) && (length($HundredVerbiage) > 0) ) {
+    $Verbiage = $HundredVerbiage;
+    if (length($TenVerbiage)) { $Verbiage .= " " . $TenVerbiage; }
   } else {
-    $Verbage=$TenVerbage;
+    $Verbiage=$TenVerbiage;
   }
-return($Verbage);
+return($Verbiage);
 }
 
 # Helper function which handles two digits (from 99 to 0)
 sub HandleTwoDigit {
-  my($Number) = shift(@_);
-  my($Verbage, $Tens, $Ones);
+  my $Number = shift(@_);
+  my($Verbiage, $Tens, $Ones);
 
   if (length($Number) < 2) {
     return($MD[$Number]);
@@ -340,21 +254,21 @@ sub HandleTwoDigit {
       $Tens = $Tens * 10;
       $Ones = substr($Number, 1, 1);
       if (length($MD[$Ones]) > 0) {
-        $Verbage = $MD[$Tens] . "-" . $MD[$Ones];
+        $Verbiage = $MD[$Tens] . "-" . $MD[$Ones];
       } else {
-        $Verbage = $MD[$Tens];
+        $Verbiage = $MD[$Tens];
       }
     }
   }
-return($Verbage);
+return($Verbiage);
 }
 
 sub HandleDecimal {
-  my($DecNumber) = shift(@_);
-  my($KeepTrailingZeros) = shift(@_);
-  my($Verbage) = "";
-  my($CategoriesIndex) = 0;
-  my($CategoryVerbage) = '';
+  my $DecNumber = shift(@_);
+  my $KeepTrailingZeros = shift(@_);
+  my $Verbiage = "";
+  my $CategoriesIndex = 0;
+  my $CategoryVerbiage = '';
 
   # I'm choosing to do this string-wise rather than mathematically
   # because the error in the mathematics can alter the number from
@@ -371,17 +285,33 @@ sub HandleDecimal {
   }
 
   $CategoriesIndex = length($DecNumber);
-  $CategoryVerbage = $Categories[$CategoriesIndex - 1];
+  $CategoryVerbiage = $Categories[$CategoriesIndex - 1];
   if (length($DecNumber) && $DecNumber == 1) {
     # if the value of what is after the decimal place is one, then
-    # we need to chop the "s" off the end of the $CategoryVerbage
+    # we need to chop the "s" off the end of the $CategoryVerbiage
     # to make is singular
-    chop($CategoryVerbage);
+    chop($CategoryVerbiage);
   }
-  $Verbage = &num2word($DecNumber) . " " . $CategoryVerbage;
-return($Verbage);
+  $Verbiage = &num2word($DecNumber) . " " . $CategoryVerbiage;
+return($Verbiage);
 }
 
+# NOTE: sprintf(%f) fails on very large decimal numbers, thus the
+# need for RoundToTwoDecimalPlaces().
+sub RoundToTwoDecimalPlaces($) {
+  my $Number=shift @_;
+
+  my($Int,$Dec,$UserScrewUp) = split(/\./, $Number, 3);
+  if (defined($UserScrewUp) && length($UserScrewUp)) {
+                warn "num2usdollars() given invalid value."; }
+  if (! length($Int)) { $Int=0; }
+  my $DecPart=int(sprintf("%0.3f", "." . $Dec) * 100 + 0.5);
+
+  $Number=$Int . '.' . $DecPart;
+return $Number;
+}
+
+# This function initializes our static, file-global variables.
 sub init_mod_vars {
   @Categories =		(
 				"TENTHS",
@@ -539,4 +469,47 @@ sub init_mod_vars {
 }
 
 1;
+
+
+
+# PERL POD ####################################################################
+
+=head1 NAME
+
+Nums2Words - compute English verbiage from numerical values
+
+=head1 SYNOPSIS
+
+=item use Nums2Words;
+
+=item $Verbiage = &num2word($Number);
+
+=item $Verbiage = &num2word_ordinal($Number);
+
+=item $Verbiage = &num2word_short_ordinal($Number);
+
+=item $Verbiage = &num2usdollars($Number);
+
+=head1 DESCRIPTION
+
+ To the best of my knowledge, this code has the potential
+ to generate US English verbiage representative of every
+ real value from negative infinity to positive infinity,
+ if the module's private variables @Classifications and
+ @Categories are filled appropriately.  This module makes
+ verbiage in "short scales" (the American thousands system).
+
+ For details see this Wikipedia article:
+ http://en.wikipedia.org/wiki/Long_and_short_scales
+
+ Copyright (C) 1996-2009, Lester H. Hightower, Jr. <hightowe@cpan.org>
+
+=head1 LICENSE
+
+ As of version 1.13, this software is licensed under the OSI certified
+ Artistic License, one of the licenses of Perl itself.
+ http://en.wikipedia.org/wiki/Artistic_License
+
+=cut
+###############################################################################
 

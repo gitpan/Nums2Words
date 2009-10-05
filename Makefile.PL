@@ -9,7 +9,6 @@ WriteMakefile(
 );
 
 print "\n";
-print "Please take a moment to review the license.\n\n";
 print "Do a 'make test' to test the module before installation\n";
 print "Do a 'make install' to install the module.\n";
 
